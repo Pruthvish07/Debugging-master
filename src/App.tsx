@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2, XCircle, Clock, Award, Play, RotateCcw, Trophy, Code2, Lightbulb, SkipForward } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { problems } from './data/problems';
+import { problemsPool, Problem } from './data/problems';
 
 export default function App() {
   const [step, setStep] = useState<'home' | 'quiz' | 'result' | 'leaderboard'>('home');
@@ -10,6 +10,7 @@ export default function App() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [timer, setTimer] = useState(0);
+  const [activeProblems, setActiveProblems] = useState<Problem[]>([]);
   const [answers, setAnswers] = useState<{ isCorrect: boolean; time: number }[]>([]);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnimating, setIsAnimating] = useState<'correct' | 'wrong' | null>(null);
@@ -23,8 +24,29 @@ export default function App() {
     return () => clearInterval(interval);
   }, [step, isAnimating, currentIndex]);
 
+  const shuffle = <T,>(array: T[]): T[] => {
+    let m = array.length, t, i;
+    while (m) {
+      i = Math.floor(Math.random() * m--);
+      t = array[m];
+      array[m] = array[i];
+      array[i] = t;
+    }
+    return array;
+  };
+
+  const generateSession = () => {
+    const beginner = shuffle([...problemsPool.filter(p => p.difficulty === 'Beginner')]).slice(0, 4);
+    const intermediate = shuffle([...problemsPool.filter(p => p.difficulty === 'Intermediate')]).slice(0, 4);
+    const expert = shuffle([...problemsPool.filter(p => p.difficulty === 'Expert')]).slice(0, 2);
+    
+    return shuffle([...beginner, ...intermediate, ...expert]);
+  };
+
   const handleStart = () => {
     if (!name.trim()) return;
+    const session = generateSession();
+    setActiveProblems(session);
     setStep('quiz');
     setCurrentIndex(0);
     setScore(0);
@@ -37,7 +59,7 @@ export default function App() {
     if (isAnimating) return;
     
     setSelectedOption(index);
-    const problem = problems[currentIndex];
+    const problem = activeProblems[currentIndex];
     const isCorrect = index === problem.correctOptionIndex;
     
     setIsAnimating(isCorrect ? 'correct' : 'wrong');
@@ -64,7 +86,7 @@ export default function App() {
     setTimer(0);
     setShowHint(false);
     
-    if (currentIndex < problems.length - 1) {
+    if (currentIndex < activeProblems.length - 1) {
       setCurrentIndex(c => c + 1);
     } else {
       finishQuiz();
@@ -178,7 +200,7 @@ export default function App() {
             >
               <div className="flex items-center justify-between mb-6">
                 <div className="flex space-x-1.5 sm:space-x-2">
-                  {problems.map((_, idx) => (
+                  {activeProblems.map((_, idx) => (
                     <div
                       key={idx}
                       className={`h-2 sm:h-3 w-2 sm:w-3 border rounded-full transition-colors ${
@@ -209,25 +231,25 @@ export default function App() {
                 <div className="p-5 md:p-8 pt-6">
                   <div className="flex items-center space-x-3 mb-3">
                     <h2 className="text-xl md:text-2xl font-serif italic text-white leading-none">
-                      {problems[currentIndex].title}
+                      {activeProblems[currentIndex].title}
                     </h2>
                     <span className={`text-[9px] uppercase tracking-[0.2em] px-2 py-1 rounded font-bold border ${
-                      problems[currentIndex].difficulty === 'Beginner' ? 'border-[#10b981]/30 text-[#10b981] bg-[#10b981]/10' :
-                      problems[currentIndex].difficulty === 'Intermediate' ? 'border-amber-500/30 text-amber-500 bg-amber-500/10' :
+                      activeProblems[currentIndex].difficulty === 'Beginner' ? 'border-[#10b981]/30 text-[#10b981] bg-[#10b981]/10' :
+                      activeProblems[currentIndex].difficulty === 'Intermediate' ? 'border-amber-500/30 text-amber-500 bg-amber-500/10' :
                       'border-[#ef4444]/30 text-[#ef4444] bg-[#ef4444]/10'
                     }`}>
-                      {problems[currentIndex].difficulty}
+                      {activeProblems[currentIndex].difficulty}
                     </span>
                   </div>
                   <div className="bg-black rounded-lg p-4 font-mono text-sm leading-relaxed border border-[#333333] text-emerald-400/80 overflow-x-auto my-6 selection:bg-purple-900/40">
-                    <pre><code>{problems[currentIndex].code}</code></pre>
+                    <pre><code>{activeProblems[currentIndex].code}</code></pre>
                   </div>
                 </div>
 
                 <div className="p-5 md:p-8 bg-black/40 border-t border-[#333333]">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                    {problems[currentIndex].options.map((opt, idx) => {
-                      const isCorrectTarget = idx === problems[currentIndex].correctOptionIndex;
+                    {activeProblems[currentIndex].options.map((opt, idx) => {
+                      const isCorrectTarget = idx === activeProblems[currentIndex].correctOptionIndex;
                       
                       let btnStateStyle = "bg-[#111111] border-[#333333] hover:border-purple-500 hover:bg-black text-[#e5e5e5]";
                       
@@ -283,7 +305,7 @@ export default function App() {
                           <Lightbulb className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
                           <div>
                             <strong className="text-amber-500 tracking-widest text-[10px] uppercase block mb-1">System Hint (Score Reduced)</strong> 
-                            {problems[currentIndex].hint}
+                            {activeProblems[currentIndex].hint}
                           </div>
                         </div>
                       </motion.div>
@@ -298,7 +320,7 @@ export default function App() {
                       >
                         <div className="p-4 bg-purple-500/10 border border-purple-500/20 text-purple-200 text-sm leading-relaxed rounded">
                           <strong className="text-purple-300 tracking-widest text-[10px] uppercase block mb-2">System Log // Explanation</strong> 
-                          {problems[currentIndex].explanation}
+                          {activeProblems[currentIndex].explanation}
                         </div>
                       </motion.div>
                     )}
@@ -310,7 +332,7 @@ export default function App() {
                         onClick={handleNext}
                         className="w-full flex items-center justify-center space-x-2 py-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-all shadow-lg shadow-emerald-500/20 uppercase tracking-widest text-sm"
                       >
-                        <span>{currentIndex < problems.length - 1 ? 'Next Question' : 'View Results'}</span>
+                        <span>{currentIndex < activeProblems.length - 1 ? 'Next Question' : 'View Results'}</span>
                         <SkipForward className="w-4 h-4" />
                       </button>
                     ) : (
@@ -362,7 +384,7 @@ export default function App() {
                   <div className="bg-black border border-[#333333] p-4 rounded-lg shadow-inner">
                     <div className="text-[10px] uppercase tracking-[0.2em] font-bold text-gray-500 mb-2">Accuracy</div>
                     <div className="text-3xl sm:text-4xl font-light text-[#10b981]">
-                      {Math.round((answers.filter(a => a.isCorrect).length / problems.length) * 100)}%
+                      {activeProblems.length > 0 ? Math.round((answers.filter(a => a.isCorrect).length / activeProblems.length) * 100) : 0}%
                     </div>
                   </div>
                 </div>
