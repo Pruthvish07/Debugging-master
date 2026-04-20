@@ -1,80 +1,73 @@
 export interface ErrorTopic {
-  code: string;
+  id: string;
   title: string;
-  category: 'Network' | 'Logic' | 'Deployment' | 'Hardware';
   description: string;
-  solution: string;
+  example: string;
+  category: 'Critical' | 'Logical' | 'Data' | 'Pythonic';
 }
 
 export const errorDatabase: ErrorTopic[] = [
-  // Hardware
   {
-    code: "HW_001",
-    title: "I2C Communication Failed",
-    category: "Hardware",
-    description: "MPU6050 or other I2C sensors not detected on the bus during scan. Often caused by address mismatch or loose wiring.",
-    solution: "Check SCL/SDA wiring. Ensure pull-up resistors are present. Use an I2C scanner script to verify the sensor's address (commonly 0x68 for MPU6050)."
+    id: "FE_001",
+    title: "Syntax Error",
+    category: "Critical",
+    description: "Occurs when the code violates the grammatical rules of the programming language, making it impossible to parse.",
+    example: "if True\n    print('Missing colon!')"
   },
   {
-    code: "HW_002",
-    title: "Baud Rate Mismatch",
-    category: "Hardware",
-    description: "Serial terminal displaying garbled characters or no data. Happens when the controller and terminal use different communication speeds.",
-    solution: "Synchronize the baud rate in your code (e.g., Serial.begin(115200)) with the serial monitor setting."
+    id: "FE_002",
+    title: "Run-time Error",
+    category: "Critical",
+    description: "An error that occurs while the program is running, often causing it to crash or terminate unexpectedly.",
+    example: "result = 10 / 0  # ZeroDivisionError"
   },
   {
-    code: "HW_003",
-    title: "Sensor Floating Input",
-    category: "Hardware",
-    description: "Digital inputs (like buttons) returning inconsistent High/Low values when not pressed.",
-    solution: "Implement a pull-down or pull-up resistor (either external 10k ohm or internal INPUT_PULLUP) to stabilize the signal."
-  },
-  
-  // Logic
-  {
-    code: "LOG_001",
-    title: "Off-by-One Error",
-    category: "Logic",
-    description: "A loop iterates one time too many or one time too few, usually at array boundaries.",
-    solution: "Double-check loop conditions (use '<' instead of '<=' for 0-indexed arrays) and verify starting/ending indices."
+    id: "FE_003",
+    title: "Semantic / Logic Error",
+    category: "Logical",
+    description: "The code runs without crashing but produces incorrect results due to a flaw in the programmer's logic.",
+    example: "def area(r):\n    return 2 * 3.14 * r  # Should be r squared!"
   },
   {
-    code: "LOG_002",
-    title: "Race Condition",
-    category: "Logic",
-    description: "Two processes or threads accessing shared data simultaneously, leading to unpredictable results.",
-    solution: "Use locks, mutexes, or atomic operations to ensure only one process modifies data at a time."
-  },
-
-  // Network
-  {
-    code: "NET_001",
-    title: "CORS Policy Block",
-    category: "Network",
-    description: "Browser blocks a request to a different domain for security reasons.",
-    solution: "Enable CORS on the server side (e.g., using 'cors' middleware in Express) and allow the specific origin."
+    id: "FE_004",
+    title: "Type Error",
+    category: "Data",
+    description: "Attempting to perform an operation on a data type that doesn't support it, like adding a string to an integer.",
+    example: "total = 5 + '10'  # TypeError"
   },
   {
-    code: "NET_002",
-    title: "DNS Resolution Failure",
-    category: "Network",
-    description: "The system cannot convert the hostname (e.g., api.myservice.com) into an IP address.",
-    solution: "Check internet connectivity. Verify the domain's A-record styling or use a hardcoded IP for testing bypass."
-  },
-
-  // Deployment
-  {
-    code: "DEP_001",
-    title: "Environment Variable Missing",
-    category: "Deployment",
-    description: "Application crashes because a required secret or API key is undefined in the environment.",
-    solution: "Verify .env files or hosting provider dashboard settings. Ensure sensitive keys aren't hardcoded or missed during CI/CD."
+    id: "FE_005",
+    title: "Indentation Error",
+    category: "Pythonic",
+    description: "A Python-specific error where the whitespace at the beginning of a line doesn't follow expected nesting rules.",
+    example: "def hello():\nprint('Wrong indent!')"
   },
   {
-    code: "DEP_002",
-    title: "Port Already In Use",
-    category: "Deployment",
-    description: "Server fails to start because another process is bound to the target port (e.g., 3000).",
-    solution: "Identify and kill the process using the port (lsof -i :3000) or change the application's listening port."
+    id: "FE_006",
+    title: "Name Error (Not Defined)",
+    category: "Critical",
+    description: "Occurs when attempting to use a variable or function name that has not been defined in the current scope.",
+    example: "print(my_variable)  # NameError: name not defined"
+  },
+  {
+    id: "FE_007",
+    title: "Index Error",
+    category: "Data",
+    description: "Happens when trying to access an element at an index that is outside the bounds of a list or sequence.",
+    example: "my_list = [1, 2]\nprint(my_list[5])  # IndexError"
+  },
+  {
+    id: "FE_008",
+    title: "Key Error",
+    category: "Data",
+    description: "Raised when a dictionary key is not found in the set of existing keys.",
+    example: "user = {'id': 1}\nprint(user['name'])  # KeyError"
+  },
+  {
+    id: "FE_009",
+    title: "Attribute Error",
+    category: "Logical",
+    description: "Occurs when an invalid attribute reference or assignment is attempted on an object.",
+    example: "num = 10\nnum.append(5)  # AttributeError: 'int' has no append"
   }
 ];

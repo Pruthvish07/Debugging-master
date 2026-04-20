@@ -7,7 +7,7 @@ export default function AdminPage() {
   const [search, setSearch] = useState('');
 
   const filteredErrors = errorDatabase.filter(err => 
-    err.code.toLowerCase().includes(search.toLowerCase()) ||
+    err.id.toLowerCase().includes(search.toLowerCase()) ||
     err.title.toLowerCase().includes(search.toLowerCase()) ||
     err.description.toLowerCase().includes(search.toLowerCase()) ||
     err.category.toLowerCase().includes(search.toLowerCase())
@@ -15,20 +15,20 @@ export default function AdminPage() {
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'Hardware': return 'border-amber-500 text-amber-500 bg-amber-500/10';
-      case 'Network': return 'border-rose-500 text-rose-500 bg-rose-500/10';
-      case 'Deployment': return 'border-blue-500 text-blue-500 bg-blue-500/10';
-      case 'Logic': return 'border-emerald-500 text-emerald-500 bg-emerald-500/10';
+      case 'Critical': return 'border-rose-500 text-rose-500 bg-rose-500/10';
+      case 'Logical': return 'border-amber-500 text-amber-500 bg-amber-500/10';
+      case 'Pythonic': return 'border-emerald-500 text-emerald-500 bg-emerald-500/10';
+      case 'Data': return 'border-blue-500 text-blue-500 bg-blue-500/10';
       default: return 'border-gray-500 text-gray-500 bg-gray-500/10';
     }
   };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'Hardware': return <Cpu className="w-4 h-4" />;
-      case 'Network': return <Globe className="w-4 h-4" />;
-      case 'Deployment': return <Share2 className="w-4 h-4" />;
-      case 'Logic': return <Wrench className="w-4 h-4" />;
+      case 'Critical': return <AlertTriangle className="w-4 h-4" />;
+      case 'Logical': return <Wrench className="w-4 h-4" />;
+      case 'Pythonic': return <Cpu className="w-4 h-4" />;
+      case 'Data': return <Share2 className="w-4 h-4" />;
       default: return <Info className="w-4 h-4" />;
     }
   };
@@ -42,7 +42,7 @@ export default function AdminPage() {
           <span>Debugging <span className="text-gray-600 font-sans not-italic">Compendium</span></span>
         </h1>
         <p className="text-gray-400 text-sm max-w-xl leading-relaxed font-mono">
-          SYSTEM_ADMIN_LOG: v2.4.0 active. Searching the central repository for common hardware malfunctions, logic gates, and networking protocols.
+          SYSTEM_ADMIN_LOG: v3.0.0 active. Identifying core syntax violations, logical fallacies, and runtime exceptions for the next generation of developers.
         </p>
       </section>
 
@@ -54,44 +54,40 @@ export default function AdminPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search error code, keyword (MPU6050, I2C, CORS)..."
+            placeholder="Search error type, keyword (Syntax, Logic, Python, Index)..."
             className="w-full pl-12 pr-4 py-4 rounded-xl bg-[#111111] border border-[#333333] focus:border-purple-500 outline-none transition-all font-mono text-sm placeholder:text-gray-700"
           />
         </div>
       </div>
 
       {/* The Pile - Error Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <AnimatePresence mode="popLayout">
           {filteredErrors.length > 0 ? (
             filteredErrors.map((err) => (
               <motion.div
-                key={err.code}
+                key={err.id}
                 layout
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-[#111111] border border-[#333333] rounded-2xl overflow-hidden hover:border-white/20 transition-colors group"
+                className="bg-[#111111] border border-[#333333] rounded-2xl overflow-hidden hover:border-white/20 transition-all group flex flex-col h-full"
               >
-                <div className="p-5 border-b border-[#333333] flex justify-between items-center bg-black/20">
-                  <span className="font-mono text-[10px] text-gray-600 uppercase tracking-widest">{err.code}</span>
-                  <div className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold border flex items-center space-x-1.5 ${getCategoryColor(err.category)}`}>
+                <div className="p-4 border-b border-[#333333] flex justify-between items-center bg-black/20">
+                  <div className={`px-2 py-0.5 rounded text-[9px] uppercase font-bold border flex items-center space-x-1.5 ${getCategoryColor(err.category)}`}>
                     {getCategoryIcon(err.category)}
                     <span>{err.category}</span>
                   </div>
                 </div>
-                <div className="p-6 space-y-4">
-                  <h3 className="text-xl font-serif italic text-white group-hover:text-purple-400 transition-colors">{err.title}</h3>
-                  <p className="text-gray-400 text-sm leading-relaxed">{err.description}</p>
+                <div className="p-5 space-y-4 flex-1">
+                  <h3 className="text-lg font-serif italic text-white group-hover:text-purple-400 transition-colors leading-tight">{err.title}</h3>
+                  <p className="text-gray-400 text-xs leading-relaxed">{err.description}</p>
                   
-                  <div className="pt-4 border-t border-[#333333]/50">
-                    <div className="flex items-center space-x-2 mb-2">
-                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                       <span className="text-[10px] uppercase tracking-widest text-emerald-500 font-bold">Solution</span>
+                  <div className="pt-4 mt-auto">
+                    <div className="text-[9px] uppercase tracking-widest text-gray-600 font-bold mb-2">Example Case</div>
+                    <div className="bg-black/40 p-3 rounded border border-white/5 font-mono text-[11px] text-emerald-400/90 whitespace-pre">
+                      <code>{err.example}</code>
                     </div>
-                    <p className="text-gray-200 text-sm font-mono bg-black/40 p-3 rounded border border-white/5">
-                      {err.solution}
-                    </p>
                   </div>
                 </div>
               </motion.div>
@@ -100,8 +96,8 @@ export default function AdminPage() {
             <div className="col-span-full py-20 text-center space-y-4">
               <Search className="w-12 h-12 text-gray-800 mx-auto" />
               <p className="text-gray-600 font-mono text-sm leading-relaxed">
-                NO_MATCH_FOUND. Logic gates closed. <br />
-                Try searching for 'MPU6050' or 'Logic'.
+                NO_ENTRY_FOUND. <br />
+                Try searching for 'Syntax' or 'Python'.
               </p>
             </div>
           )}
